@@ -3,12 +3,43 @@ import { StatusBar} from "expo-status-bar"
 import "../global.css"
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CalendarDaysIcon, MagnifyingGlassIcon, MapPinIcon} from "react-native-heroicons/outline"
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { debounce } from "lodash"
+import { fetchLocation, fetchWeatherForecast } from "@/api";
+import axios from "axios";
 
 export default function App(){
     const insect = useSafeAreaInsets()
     const [showSearch, setShowSearch] = useState(false)
-    const [location,setLocation] = useState([1,2,3])
+    const [weather, setWeather] = useState({})
+    
+    const [location,setLocation] = useState<any>([])
+    const handleSearch=async (e:string)=>{
+        if(e.length >2 ){
+            setShowSearch(true)
+            const resposne = await axios.get(`https://api.weatherapi.com/v1/search.json?key=1db28aaeda084d7c9dc215139260702&q=${e}`)
+            // if(resposne.status)
+            setLocation(resposne.data)
+        }else{
+            setShowSearch(false)
+        }
+    }
+
+    const searchButton= async (loc:any)=>{
+        console.log("inside")
+        setLocation([])
+        console.log('loc',loc)
+        console.log("weather -> ",weather)
+
+        const response = await axios.get(`https://api.weatherapi.com/v1/forecast.json?key=1db28aaeda084d7c9dc215139260702&q=${loc.name}&days=1&aqi=no&alerts=no`)
+
+      
+            setWeather(response.data)
+        
+        
+        console.log("weather ->", weather)
+    }
+    const locationSearchDebounce = useCallback(debounce(handleSearch, 1200), [])
     return <View className="flex-1 relative">
         <StatusBar style="light"/>
             <Image blurRadius={70} source={require("../assets/images/bg.png")} className="h-full w-full " style={{position : "absolute"}}/>
@@ -16,14 +47,13 @@ export default function App(){
                 <View style={{height : "7%"}} className="mx-4 relative ">
                     <View className="flex-row justify-between items-center rounded-full  bg-gray-500" >
                         <TextInput
+                            onChangeText={locationSearchDebounce}
                             placeholder="Search city"
                             placeholderTextColor={"lightgray"}
                             className="pl-4 h-18 flex-1 text-lg text-white rounded-full ml-3 fixed"
                         />
                         <TouchableOpacity className="rounded-full bg-gray-400 p-3 m-1  flex items-center justify-center pt-3" 
-                            onPress={()=>{
-                                setShowSearch(c => !c)
-                            }}>
+                            >
                             <MagnifyingGlassIcon size="25" color="white"/>
                         </TouchableOpacity>
                     </View>
@@ -31,17 +61,16 @@ export default function App(){
                         location.length > 0 && showSearch ? (
                             <View className="absolute w-full bg-gray-400 top-16 rounded-3xl">
                                 {
-                                    location.map((loc,index) =>{
+                                    location.map((loc:any,index:any) =>{
                                         let showBorder = index +1 != location.length;
                                         let borderClass = showBorder ? " border-b-2 border-b-gray-600" : "";
                                         return (
-                                            <TouchableOpacity className={"p-4 text-lg   flex-row  items-center border-0 px-4 "+     borderClass} key={index}
-                                                onPress={(loc)=>{
-                                                    console.log(loc)
-                                                }}
+                                            <TouchableOpacity className={"p-4 text-lg   flex-row  items-center border-0 px-4 "+borderClass} key={index}
+                                                onPress={()=>searchButton(loc)}
                                             >
                                                 <MapPinIcon size={"20"} />
-                                                <Text> Lodon, United Kingdom </Text>
+                                                <Text className="font-semibold text-lg"> {loc?.name}</Text>
+                                                <Text>, {loc.country} </Text>
                                             </TouchableOpacity>
                                         )
                                     } )
