@@ -18,8 +18,8 @@ export default function App(){
     const [loading, setLoading] = useState(true)
      
     useEffect(()=>{
-        setWeather(dummyWeatherData)
-        axios.get(`https://api.weatherapi.com/v1/forecast.json?key=1db28aaeda084d7c9dc215139260702&q=delhi&days=1&aqi=no&alerts=no`).then( data =>{
+        // setWeather(dummyWeatherData)
+        axios.get(`https://api.weatherapi.com/v1/forecast.json?key=1db28aaeda084d7c9dc215139260702&q=delhi&days=7&aqi=no&alerts=no`).then( data =>{
             setWeather(data.data)
             console.log("got data ->", data.data)
             setLoading(false)
@@ -42,8 +42,13 @@ export default function App(){
         
         console.log("weather -> ",weather)
         setShowSearch([])
-        const response = await axios.get(`https://api.weatherapi.com/v1/forecast.json?key=1db28aaeda084d7c9dc215139260702&q=${loc.name}&days=1&aqi=no&alerts=no`)
-
+        setLoading(true)
+        new Promise(res => setTimeout(res, 1000))
+        const response = await axios.get(`https://api.weatherapi.com/v1/forecast.json?key=1db28aaeda084d7c9dc215139260702&q=${loc.name}&days=7&aqi=no&alerts=no`)
+        if(response.status == 200){
+            setLoading(false)
+            setShowSearch(false)
+        }
       
         setWeather(response.data)
         
@@ -64,7 +69,9 @@ export default function App(){
             
             {
                 loading  ? (
-                    <Text>Loading...</Text>
+                    <View className="h-screen w-full flex justify-center items-center">
+                        <Text className="h-screen w-full flex text-center ">Loading...</Text>
+                    </View>
                 ) : (
                    
                 <View className="flex flex-1 " style={{paddingTop : insect.top+15}}>
@@ -105,11 +112,11 @@ export default function App(){
                         }
                     </View>
 
-                    <View className="mx-4 flex justify-around flex-1 mb-2">
-                        <Text className="text-white text-center text-2xl font-bold">
-                            {weather && weather.location.name},
+                    <View className="mx-4 flex justify-around flex-1 mb-2 ">
+                        <Text className="text-white text-center text-4xl font-bold">
+                            {weather && weather.location.name }
                             <Text className="text-lg font-semibold text-gray-300">
-                                {" "+ weather && weather.location.country}
+                                {", " +weather.location.country}
                             </Text>
                         </Text>
                         <View className="flex-row justify-center">
@@ -117,10 +124,10 @@ export default function App(){
                         </View>
                         <View className="space-y-2">
                             <Text className="text-center font-bold text-white text-6xl ml-5">
-                                {weather && weather.current.temp_c}&#176;
+                                {weather.current.temp_c}&#176;
                             </Text>
                             <Text className="text-center font-bold text-white text-xl tracking-widest">
-                                {/* {current?.condition?.text} */}
+                                {weather.current?.condition?.text}
                             </Text>
                         </View>
                         <View className="flex-row justify-between mx-4">
@@ -133,23 +140,23 @@ export default function App(){
                             <View className="flex-row space-x-2 items-center gap-2">
                                 <Image source={require("../assets/icons/drop.png")} className="h-6 w-6"/>
                                 <Text className="text-white font-semibold text-base">
-                                    {/* {/* {current?.humidity}% */} 
+                                    {weather.current?.humidity}% 
                                 </Text>
                             </View>
                             <View className="flex-row space-x-2 items-center gap-2">
                                 <Image source={require("../assets/icons/sun.png")} className="h-6 w-6"/>
                                 <Text className="text-white font-semibold text-base">
-                                    6:05 AM
+                                    {weather.forecast.forecastday[0]?.astro?.sunrise}
                                 </Text>
                             </View>
                         </View>
                     </View>
-                    <View className="mb-2 space-y-3 ">
+                    <View className="mb-2 space-y-3 flex gap-2">
                         <View className="flex-row items-center mx-5 space-x-2">
                             <CalendarDaysIcon size={"22"} color={"white"}/>
                             <Text className="text-white text-base">Daily forecast</Text>
                         </View>
-                        <ScrollView horizontal  contentContainerStyle={{paddingHorizontal : 15}} showsHorizontalScrollIndicator={false}>
+                        <ScrollView horizontal  contentContainerStyle={{paddingHorizontal : 15}} showsHorizontalScrollIndicator={false} className="flex gap-2 flex-row">
                         {
                             weather?.forecast?.forecastday?.map((item, idx)=>{
                                 let date = new Date(item.date)
@@ -158,7 +165,7 @@ export default function App(){
                                 let dayName = date.toLocaleDateString('en-Us', options);
                                 dayName.split(',')[0]
                                 return (
-                                    <View key={idx} className="flex justify-center items-center w-24 rounded-3xl py-3 space-y-2 bg-gray-500">
+                                    <View key={idx} className="flex justify-center items-center w-24 rounded-3xl py-3 space-y-2 bg-gray-500 mx-2">
                                         <Image source={getWeatherImage(item.day.condition.text)} className="h-11 w-11"/>
                                         <Text className="text-white">
                                             {dayName}
