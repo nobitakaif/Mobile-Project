@@ -7,7 +7,8 @@ import { useCallback, useEffect, useState } from "react";
 import { debounce } from "lodash"
 import { fetchLocation, fetchWeatherForecast } from "@/api";
 import axios from "axios";
-import { dummyWeatherData, WeatherCondition, weatherImages, WeatherResponse } from "@/constant/url";
+import { API_KEY, dummyWeatherData, WeatherCondition, weatherImages, WeatherResponse } from "@/constant/url";
+import { getData, storeData } from "@/constant/localStorage";
 
 
 
@@ -18,19 +19,26 @@ export default function App(){
     const [loading, setLoading] = useState(true)
      
     useEffect(()=>{
-        // setWeather(dummyWeatherData)
-        axios.get(`https://api.weatherapi.com/v1/forecast.json?key=1db28aaeda084d7c9dc215139260702&q=delhi&days=7&aqi=no&alerts=no`).then( data =>{
+        fetchData()
+    },[])
+    
+    const fetchData = async()=>{
+        let myCity = await getData('city')
+        let cityName = 'Delhi india'
+        if(myCity) cityName = myCity
+        axios.get(`https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=delhi,indiai&days=7&aqi=no&alerts=no`).then( data =>{
             setWeather(data.data)
             console.log("got data ->", data.data)
             setLoading(false)
         })
-    },[])
+        
+    }
     
     const [currentLocation,setLocation] = useState<any>([])
     const handleSearch=async (e:string)=>{
         if(e.length >2 ){
             setShowSearch(true)
-            const resposne = await axios.get(`https://api.weatherapi.com/v1/search.json?key=1db28aaeda084d7c9dc215139260702&q=${e}`)
+            const resposne = await axios.get(`https://api.weatherapi.com/v1/search.json?key=${API_KEY}&q=${e}`)
             console.log(resposne.data)
             setLocation(resposne.data)
         }else{
@@ -44,15 +52,13 @@ export default function App(){
         setShowSearch([])
         setLoading(true)
         new Promise(res => setTimeout(res, 1000))
-        const response = await axios.get(`https://api.weatherapi.com/v1/forecast.json?key=1db28aaeda084d7c9dc215139260702&q=${loc.name}&days=7&aqi=no&alerts=no`)
+        const response = await axios.get(`https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${loc.name}&days=7&aqi=no&alerts=no`)
         if(response.status == 200){
             setLoading(false)
             setShowSearch(false)
+            setWeather(response.data)
+            storeData('city', loc.name)
         }
-      
-        setWeather(response.data)
-        
-        
         console.log("response.data ->", response.data)
     }
     const locationSearchDebounce = useCallback(debounce(handleSearch, 1200), [])
@@ -146,7 +152,8 @@ export default function App(){
                             <View className="flex-row space-x-2 items-center gap-2">
                                 <Image source={require("../assets/icons/sun.png")} className="h-6 w-6"/>
                                 <Text className="text-white font-semibold text-base">
-                                    {weather.forecast.forecastday[0]?.astro?.sunrise}
+                                    {/* {new Date().toDateString()} */}
+                                    {weather.location.localtime.split(' ')[1]}
                                 </Text>
                             </View>
                         </View>

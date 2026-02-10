@@ -16,6 +16,8 @@ export const weatherImages = {
   'other': require('../assets/images/moderaterain.png'),
 } as const;
 
+export const API_KEY= '1db28aaeda084d7c9dc215139260702' // put your api key
+
 export type WeatherCondition =
   keyof typeof weatherImages;
 
