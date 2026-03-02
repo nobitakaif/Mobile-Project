@@ -1,14 +1,30 @@
-import { BANNERS } from "@/assets/assetes-ecommerce/assets/assets";
-import React, { useState } from "react";
+import { BANNERS, dummyProducts } from "@/assets/assetes-ecommerce/assets/assets";
+import React, { useEffect, useState } from "react";
 import Header from "@/components/header";
-import { Dimensions, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Dimensions, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { CATEGORIES } from "@/constants";
+import CategoryItem from "@/components/categoryItem";
+import { Product } from "@/constants/types";
 
 const { width } = Dimensions.get("window")
 export default function Home() {
     const router = useRouter()
     const [activeBannerIndex, setActiveBannerIndex] = useState(0)
+    const catogries = [{id:'all', name : 'All', icon : 'grid'},...CATEGORIES]
+    const [products, setProducts] = useState<Product[]>([])
+    const [loading, setLoading] = useState(true)
+
+    const fetchProduct = async () =>{
+        setProducts(dummyProducts)
+        setLoading(false)
+    }
+
+    useEffect(()=>{
+        fetchProduct()
+    },[])
+    
     return <SafeAreaView className="flex-1 " edges={['top']}>
         <Header showBack={false} title="Forver" showCart showLogo showMenu />
 
@@ -49,8 +65,37 @@ export default function Home() {
                     ))}
                 </View>
             </View>
-        </ScrollView>
+            <View>
+                <View className="flex-row justify-between items-center mb-4">
+                    <Text className="text-xl font-bold text-primary"> Categories </Text>
+                </View>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    {catogries.map((cat,idx) =>(
+                        <CategoryItem item={cat} key={idx} isSelected={false} onPress={()=> router.push({pathname : "/shop", params : {category : cat.id === 'all' ? '' : cat.name}})}/>
+                    ))}
+                </ScrollView>
+            </View>
 
+            <View className="mb-8">
+                <View className="flex-row justify-between items-center mb-4">
+                        <Text className="text-xl font-bold">Popular</Text>
+                        <TouchableOpacity onPress={() => router.push("/shop")}>
+                            <Text className="text-secondary text-sm">See All</Text>
+                        </TouchableOpacity>
+                </View>
+                {loading ? (
+                        <ActivityIndicator size={"large"}/>
+                    ):(
+                        <View>
+                            {products.slice(0,4).map((product) =>(
+                                <Text>{product.name}</Text>
+                            ))}
+                        </View>
+                    )
+                }
+            </View>
+            
+        </ScrollView>
 
     </SafeAreaView>
 }
