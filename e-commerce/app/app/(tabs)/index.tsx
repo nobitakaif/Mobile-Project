@@ -1,12 +1,14 @@
 import { BANNERS, dummyProducts } from "@/assets/assetes-ecommerce/assets/assets";
 import React, { useEffect, useState } from "react";
 import Header from "@/components/header";
-import { ActivityIndicator, Dimensions, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Dimensions, Image, ScrollView, Text, Touchable, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { CATEGORIES } from "@/constants";
 import CategoryItem from "@/components/categoryItem";
 import { Product } from "@/constants/types";
+import ProductCart from "@/components/productCart";
+import { Ionicons } from "@expo/vector-icons";
 
 const { width } = Dimensions.get("window")
 export default function Home() {
@@ -86,15 +88,25 @@ export default function Home() {
                 {loading ? (
                         <ActivityIndicator size={"large"}/>
                     ):(
-                        <View>
+                        <View className="flex-row flex-wrap justify-between">
                             {products.slice(0,4).map((product) =>(
-                                <Text>{product.name}</Text>
+                                <ProductCart key={product._id} product={product}/>
                             ))}
                         </View>
+                        
                     )
                 }
             </View>
             
+            <View className="bg-gray-100 p6 rounded-2xl mb-20 items-center">
+                <Text className="text-2xl font-bold text-primary mb-2 text-center">Join the Revolution</Text>
+                <Text className="text-secondary text-center mb-4 font-semibold">
+                    Subscribe to our newsletter and get 10% off your first purchase
+                </Text>
+                <TouchableOpacity className="bg-primary w-4/5 py-3 rounded-full items-center">
+                    <Text className="text-white font-medium text-base">Subscribe Now</Text>
+                </TouchableOpacity>
+            </View>
         </ScrollView>
 
     </SafeAreaView>
