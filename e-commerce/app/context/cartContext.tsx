@@ -66,7 +66,7 @@ export function CartProvider({children}:{children : ReactNode}){
     const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
     
     return (
-        <CartContext.Provider value={{cartItem, addToCart, removeFromCart, updateQuantity, clearCart, itemCount, isLoading}}>
+        <CartContext.Provider value={{cartItems, addToCart, removeFromCart, updateQuantity, clearCart, itemCount, isLoading}}>
             {children}
         </CartContext.Provider>
     )
