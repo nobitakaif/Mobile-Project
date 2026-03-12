@@ -24,13 +24,13 @@ export default function ProducctDetails(){
     const [activeImageIndex, setActiveImageIndex] = useState(0)
 
     const fetchProduct = ()=>{
-        setProduct(dummyProducts.find((prodcut)=> prodcut._id === id) as any)
+        setProduct(dummyProducts.find((prodcut)=> prodcut._id === id) ?? null)
         setLoading(false)
     }
     
     useEffect(()=>{
         fetchProduct()
-    },[])
+    },[id])
 
     if(loading){
         return <SafeAreaView className="flex-1 justify-center items-center">

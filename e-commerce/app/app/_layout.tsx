@@ -14,7 +14,7 @@ export default function RootLayout(){
                 <Stack screenOptions={{
                     headerShown : false
                 }}/>
-                <Toast position="bottom" />
+                <Toast position="top" />
                 </WishlistProvider>
             </CartProvider>
         </GestureHandlerRootView>        
